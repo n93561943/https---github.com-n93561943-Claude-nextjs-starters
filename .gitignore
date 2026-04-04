@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# claude 로컬 설정 / playwright 테스트 아티팩트
+.claude/.settings.local.json
+.playwright-mcp/
+screenshot-*.png
