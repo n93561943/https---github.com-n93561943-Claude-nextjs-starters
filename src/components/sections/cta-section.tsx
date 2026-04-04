@@ -37,7 +37,7 @@ export function CTASection() {
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-11 px-8 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
+                className="h-11 px-8 border-white/60 text-primary bg-white hover:bg-white/90"
               >
                 <Link href="/login">
                   로그인
