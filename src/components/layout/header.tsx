@@ -1,10 +1,7 @@
-"use client"
-
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,17 +18,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { cn } from "@/lib/utils"
-
-const navLinks = [
-  { href: "/", label: "홈" },
-  { href: "#features", label: "기능" },
-  { href: "#cta", label: "시작하기" },
-]
+import { NavLinks } from "@/components/layout/nav-links"
 
 export function Header() {
-  const pathname = usePathname()
-
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-14 items-center justify-between px-4">
@@ -41,34 +30,20 @@ export function Header() {
           <span>스타터킷</span>
         </Link>
 
-        {/* 데스크탑 네비게이션 */}
+        {/* 데스크탑 네비게이션 - NavLinks 클라이언트 컴포넌트로 분리 */}
         <nav className="hidden md:flex items-center gap-6">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "text-sm transition-colors hover:text-foreground",
-                pathname === link.href
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <NavLinks />
         </nav>
 
         {/* 우측 액션 영역 */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
 
-          {/* 유저 메뉴 */}
+          {/* 유저 메뉴 - 빈 src AvatarImage 제거 */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="" alt="사용자" />
                   <AvatarFallback>U</AvatarFallback>
                 </Avatar>
               </Button>
@@ -104,20 +79,7 @@ export function Header() {
                 <SheetTitle>메뉴</SheetTitle>
               </SheetHeader>
               <nav className="flex flex-col gap-4 mt-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "text-sm transition-colors hover:text-foreground",
-                      pathname === link.href
-                        ? "text-foreground font-medium"
-                        : "text-muted-foreground"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                <NavLinks />
                 <div className="border-t border-border pt-4 space-y-2">
                   <Button asChild variant="outline" className="w-full">
                     <Link href="/login">로그인</Link>
