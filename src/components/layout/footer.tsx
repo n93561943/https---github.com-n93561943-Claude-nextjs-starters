@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Separator } from "@/components/ui/separator"
 
 export function Footer() {
@@ -18,9 +19,9 @@ export function Footer() {
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">제품</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">기능 소개</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">가격 정책</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">변경 이력</a></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">기능 소개</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">가격 정책</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">변경 이력</Link></li>
             </ul>
           </div>
 
@@ -28,9 +29,9 @@ export function Footer() {
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">지원</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">문서</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">GitHub</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">Discord</a></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">문서</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">GitHub</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">Discord</Link></li>
             </ul>
           </div>
 
@@ -38,8 +39,8 @@ export function Footer() {
           <div className="space-y-3">
             <h3 className="text-sm font-semibold">법적 고지</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><a href="#" className="hover:text-foreground transition-colors">개인정보처리방침</a></li>
-              <li><a href="#" className="hover:text-foreground transition-colors">이용약관</a></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">개인정보처리방침</Link></li>
+              <li><Link href="#" className="hover:text-foreground transition-colors">이용약관</Link></li>
             </ul>
           </div>
         </div>

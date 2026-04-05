@@ -9,9 +9,8 @@ import {
   BarChart3,
   LogOut,
 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
 const navItems = [
@@ -21,11 +20,15 @@ const navItems = [
   { href: "/dashboard/settings", label: "설정", icon: Settings },
 ]
 
-export function Sidebar() {
+interface SidebarProps {
+  className?: string
+}
+
+export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-border bg-sidebar">
+    <aside className={cn("flex h-full w-64 flex-col border-r border-border bg-sidebar", className)}>
       {/* 헤더 */}
       <div className="flex h-14 items-center px-4 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2 font-semibold">
@@ -61,12 +64,11 @@ export function Sidebar() {
         </ul>
       </nav>
 
-      {/* 푸터 */}
+      {/* 푸터 - border-t와 Separator 중복 제거: border-t만 사용 */}
       <div className="p-4 border-t border-sidebar-border">
-        <Separator className="mb-4" />
         <div className="flex items-center gap-3">
+          {/* 빈 src AvatarImage 제거 */}
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt="사용자" />
             <AvatarFallback>U</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">

@@ -19,11 +19,11 @@ export default function AuthLayout({
       {/* 하단 링크 */}
       <p className="mt-8 text-center text-sm text-muted-foreground">
         계속 진행하면{" "}
-        <Link href="#" className="underline underline-offset-4 hover:text-foreground">
+        <Link href="/terms" className="underline underline-offset-4 hover:text-foreground">
           이용약관
         </Link>{" "}
         및{" "}
-        <Link href="#" className="underline underline-offset-4 hover:text-foreground">
+        <Link href="/privacy" className="underline underline-offset-4 hover:text-foreground">
           개인정보처리방침
         </Link>
         에 동의하는 것으로 간주됩니다.
