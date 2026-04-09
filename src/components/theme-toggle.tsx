@@ -1,19 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import { useTheme } from "next-themes"
 import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { useEffect, useState } from "react"
 
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme()
+  // SSR/CSR 하이드레이션 불일치 방지: 마운트 후에만 실제 테마 버튼 렌더링
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  useEffect(() => setMounted(true), [])
 
-  // 하이드레이션 불일치 방지: 마운트 전에는 비활성 버튼 렌더링
   if (!mounted) {
     return (
       <Button variant="ghost" size="icon" aria-label="테마 전환" disabled>
