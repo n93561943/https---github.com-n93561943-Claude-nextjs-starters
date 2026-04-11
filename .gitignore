@@ -42,5 +42,10 @@ next-env.d.ts
 
 # claude 로컬 설정 / playwright 테스트 아티팩트
 .claude/.settings.local.json
+.claude/agent-memory/
 .playwright-mcp/
 screenshot-*.png
+tc*.png
+
+# 로컬 작업 디렉토리
+notion-cms-project/
