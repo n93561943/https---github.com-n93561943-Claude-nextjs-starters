@@ -2,22 +2,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  LayoutDashboard,
-  Settings,
-  Users,
-  BarChart3,
-  LogOut,
-} from "lucide-react"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { FileText, LayoutDashboard } from "lucide-react"
 import { cn } from "@/lib/utils"
 
+// 견적서 관리 Admin 네비게이션 항목
 const navItems = [
-  { href: "/dashboard", label: "대시보드", icon: LayoutDashboard },
-  { href: "/dashboard/analytics", label: "분석", icon: BarChart3 },
-  { href: "/dashboard/users", label: "사용자", icon: Users },
-  { href: "/dashboard/settings", label: "설정", icon: Settings },
+  { href: "/invoices", label: "견적서 목록", icon: LayoutDashboard },
 ]
 
 interface SidebarProps {
@@ -32,8 +22,8 @@ export function Sidebar({ className }: SidebarProps) {
       {/* 헤더 */}
       <div className="flex h-14 items-center px-4 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2 font-semibold">
-          <span className="text-primary">✦</span>
-          <span>스타터킷</span>
+          <FileText className="h-5 w-5 text-primary" />
+          <span>Invoice Web</span>
         </Link>
       </div>
 
@@ -42,7 +32,8 @@ export function Sidebar({ className }: SidebarProps) {
         <ul className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href
+            // 현재 경로가 해당 메뉴 경로로 시작하면 활성 상태
+            const isActive = pathname.startsWith(item.href)
 
             return (
               <li key={item.href}>
@@ -63,23 +54,6 @@ export function Sidebar({ className }: SidebarProps) {
           })}
         </ul>
       </nav>
-
-      {/* 푸터 - border-t와 Separator 중복 제거: border-t만 사용 */}
-      <div className="p-4 border-t border-sidebar-border">
-        <div className="flex items-center gap-3">
-          {/* 빈 src AvatarImage 제거 */}
-          <Avatar className="h-8 w-8">
-            <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">사용자</p>
-            <p className="text-xs text-muted-foreground truncate">user@example.com</p>
-          </div>
-          <Button variant="ghost" size="icon" className="shrink-0" aria-label="로그아웃">
-            <LogOut className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
     </aside>
   )
 }

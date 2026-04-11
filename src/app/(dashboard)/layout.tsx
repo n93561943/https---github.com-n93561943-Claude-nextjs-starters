@@ -37,7 +37,7 @@ export default function DashboardLayout({
               <Sidebar />
             </SheetContent>
           </Sheet>
-          <span className="font-semibold">스타터킷</span>
+          <span className="font-semibold">Invoice Web</span>
         </header>
 
         <main className="flex-1 overflow-auto p-6">{children}</main>

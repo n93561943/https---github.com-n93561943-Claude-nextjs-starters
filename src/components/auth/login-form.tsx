@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,7 +16,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { loginSchema, type LoginInput } from "@/lib/validations"
+
+// MVP Out-of-Scope: 로그인 기능은 추후 구현 예정
+// 스키마를 컴포넌트 파일 내부에서 직접 정의하여 validations.ts 의존성 제거
+const loginSchema = z.object({
+  email: z
+    .string()
+    .min(1, "이메일을 입력해주세요.")
+    .email("유효한 이메일 주소를 입력해주세요."),
+  password: z
+    .string()
+    .min(1, "비밀번호를 입력해주세요.")
+    .min(8, "비밀번호는 최소 8자 이상이어야 합니다."),
+})
+
+type LoginInput = z.infer<typeof loginSchema>
 
 export function LoginForm() {
   const {
@@ -28,7 +43,7 @@ export function LoginForm() {
 
   async function onSubmit(data: LoginInput) {
     try {
-      // 실제 로그인 로직 구현 위치
+      // TODO: 실제 인증 로직 구현
       await new Promise((resolve) => setTimeout(resolve, 1000))
       toast.success("로그인에 성공했습니다!", {
         description: `${data.email}으로 로그인되었습니다.`,
@@ -43,9 +58,9 @@ export function LoginForm() {
   return (
     <Card>
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl text-center">로그인</CardTitle>
+        <CardTitle className="text-2xl text-center">관리자 로그인</CardTitle>
         <CardDescription className="text-center">
-          계정에 로그인하세요
+          Invoice Web 관리자 계정으로 로그인하세요
         </CardDescription>
       </CardHeader>
 
@@ -57,7 +72,7 @@ export function LoginForm() {
             <Input
               id="email"
               type="email"
-              placeholder="name@example.com"
+              placeholder="admin@example.com"
               autoComplete="email"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? "email-error" : undefined}
@@ -72,15 +87,7 @@ export function LoginForm() {
 
           {/* 비밀번호 */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">비밀번호</Label>
-              <Link
-                href="#"
-                className="text-xs text-muted-foreground hover:text-foreground underline-offset-4 hover:underline"
-              >
-                비밀번호 찾기
-              </Link>
-            </div>
+            <Label htmlFor="password">비밀번호</Label>
             <Input
               id="password"
               type="password"
@@ -103,12 +110,11 @@ export function LoginForm() {
             {isSubmitting ? "로그인 중..." : "로그인"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
-            계정이 없으신가요?{" "}
             <Link
-              href="/register"
+              href="/"
               className="text-foreground underline underline-offset-4 hover:text-primary"
             >
-              회원가입
+              홈으로 돌아가기
             </Link>
           </p>
         </CardFooter>

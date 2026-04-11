@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "모던 웹 스타터킷",
-  description: "Next.js 16 App Router 기반 모던 웹 스타터킷",
+  title: "Invoice Web",
+  description: "노션 기반 견적서 웹 공유 서비스",
 };
 
 export default function RootLayout({

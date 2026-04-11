@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, Sparkles } from "lucide-react"
+import { ArrowRight, FileText } from "lucide-react"
 
 export function HeroSection() {
   return (
@@ -13,40 +13,37 @@ export function HeroSection() {
 
       <div className="container relative mx-auto px-4 text-center">
         <Badge variant="secondary" className="mb-6 inline-flex items-center gap-1.5">
-          <Sparkles className="h-3 w-3" />
-          Next.js 16 · React 19 · Tailwind v4
+          <FileText className="h-3 w-3" />
+          노션 기반 견적서 공유 서비스
         </Badge>
 
         <h1 className="mx-auto max-w-4xl text-4xl font-bold tracking-tight md:text-6xl lg:text-7xl">
-          모던 웹 개발을{" "}
-          <span className="text-primary">빠르게</span> 시작하세요
+          견적서를{" "}
+          <span className="text-primary">링크 하나</span>로
+          <br />
+          간편하게 공유하세요
         </h1>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-          검증된 기술 스택과 컴포넌트로 구성된 스타터킷으로
-          프로덕션 수준의 웹 애플리케이션을 즉시 개발하세요.
+          노션 데이터베이스와 연동하여 전문적인 견적서를 생성하고,
+          고유 URL로 클라이언트에게 바로 공유하세요.
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button asChild size="lg" className="h-11 px-8">
-            <Link href="/register">
-              무료로 시작하기
+            <Link href="/invoices">
+              견적서 관리하기
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
-          <Button asChild variant="outline" size="lg" className="h-11 px-8">
-            <Link href="#features">
-              기능 살펴보기
             </Link>
           </Button>
         </div>
 
-        {/* 통계 */}
+        {/* 핵심 기능 요약 */}
         <div className="mt-16 grid grid-cols-3 gap-8 border-t border-border pt-10">
           {[
-            { label: "컴포넌트", value: "20+" },
-            { label: "레이아웃", value: "4개" },
-            { label: "즉시 배포", value: "가능" },
+            { label: "노션 연동", value: "자동" },
+            { label: "PDF 다운로드", value: "지원" },
+            { label: "공유 링크", value: "즉시" },
           ].map((stat) => (
             <div key={stat.label}>
               <p className="text-3xl font-bold">{stat.value}</p>
