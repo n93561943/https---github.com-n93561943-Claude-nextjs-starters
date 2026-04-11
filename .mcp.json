@@ -22,6 +22,19 @@
         "-y",
         "@modelcontextprotocol/server-sequential-thinking"
       ]
+    },
+    "shrimp-task-manager": {
+      "command": "node",
+      "args": ["/Users/jeong/workspace/mcp-shrimp-task-manager/dist/index.js"],
+      "env": {
+        "DATA_DIR": "/Users/jeong/workspace/invoice-web/shrimp_data",
+        "TEMPLATES_USE": "ko",
+        "ENABLE_GUI": "false"
+      }
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
     }
   }
 }
