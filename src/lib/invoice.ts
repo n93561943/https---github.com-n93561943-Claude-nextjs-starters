@@ -1,11 +1,11 @@
-import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints/common"
+import type { PageObjectResponse } from "@notionhq/client/build/src/api-endpoints"
 
 // ─────────────────────────────────────────────
 // 타입 정의
 // ─────────────────────────────────────────────
 
 /** 견적서 상태 (Notion DB Select 값과 일치) */
-export type InvoiceStatus = "초안" | "발송됨" | "승인됨" | "거절됨"
+export type InvoiceStatus = "시작 전" | "진행 중" | "완료"
 
 /** 견적서 품목 */
 export interface InvoiceItem {
@@ -45,7 +45,7 @@ export interface Invoice {
   tax: number
   /** 최종금액 (원) */
   totalAmount: number
-  /** 견적서 품목 목록 (Rich Text JSON에서 파싱) */
+  /** 견적서 품목 목록 (Items DB Relation에서 조회) */
   items: InvoiceItem[]
 }
 
@@ -58,22 +58,20 @@ export const INVOICE_STATUS_VARIANT: Record<
   InvoiceStatus,
   "default" | "secondary" | "outline" | "destructive"
 > = {
-  초안: "secondary",
-  발송됨: "default",
-  승인됨: "outline",
-  거절됨: "destructive",
+  "시작 전": "secondary",
+  "진행 중": "default",
+  완료: "outline",
 }
 
 /** 상태별 한국어 레이블 */
 export const INVOICE_STATUS_LABEL: Record<InvoiceStatus, string> = {
-  초안: "초안",
-  발송됨: "발송됨",
-  승인됨: "승인됨",
-  거절됨: "거절됨",
+  "시작 전": "시작 전",
+  "진행 중": "진행 중",
+  완료: "완료",
 }
 
 /** 유효한 InvoiceStatus 값 목록 */
-const VALID_STATUSES: InvoiceStatus[] = ["초안", "발송됨", "승인됨", "거절됨"]
+const VALID_STATUSES: InvoiceStatus[] = ["시작 전", "진행 중", "완료"]
 
 /**
  * 문자열이 유효한 InvoiceStatus인지 확인
@@ -141,7 +139,7 @@ function extractText(property: any): string {
 }
 
 /**
- * Rich Text 속성에서 숫자 값 추출
+ * Notion number 속성에서 숫자 값 추출
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractNumber(property: any): number {
@@ -151,40 +149,53 @@ function extractNumber(property: any): number {
 }
 
 /**
- * 품목 데이터를 Rich Text의 JSON 문자열에서 파싱
- * 저장 형식 예시: '[{"name":"웹 개발","quantity":1,"unitPrice":1000000}]'
+ * Notion relation 속성에서 연결된 페이지 ID 목록 추출
  */
-function parseItems(raw: string): InvoiceItem[] {
-  try {
-    const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function extractRelationIds(property: any): string[] {
+  if (!property || property.type !== "relation") return []
+  return property.relation?.map((r: { id: string }) => r.id) ?? []
+}
 
-    return parsed.map((item) => ({
-      name: String(item.name ?? ""),
-      quantity: Number(item.quantity ?? 0),
-      unitPrice: Number(item.unitPrice ?? 0),
-      amount: Number(item.quantity ?? 0) * Number(item.unitPrice ?? 0),
-    }))
-  } catch {
-    return []
+/**
+ * Items DB 페이지를 InvoiceItem으로 변환
+ * Items DB 필드: 항목명(title), 수량(number), 단가(number)
+ */
+export function mapItemPageToInvoiceItem(page: PageObjectResponse): InvoiceItem {
+  const props = page.properties
+  const quantity = extractNumber(props["수량"])
+  const unitPrice = extractNumber(props["단가"])
+  return {
+    name: extractText(props["항목명"]),
+    quantity,
+    unitPrice,
+    amount: quantity * unitPrice,
   }
 }
 
 /**
  * Notion PageObjectResponse를 Invoice 도메인 모델로 변환
+ * @param page - Invoices DB 페이지
+ * @param relatedItemPages - 관계 연결된 Items DB 페이지 목록 (상세 조회 시 전달)
  */
-export function mapPageToInvoice(page: PageObjectResponse): Invoice {
+export function mapPageToInvoice(
+  page: PageObjectResponse,
+  relatedItemPages?: PageObjectResponse[]
+): Invoice {
   const props = page.properties
 
   const statusRaw = extractText(props["상태"])
-  const status: InvoiceStatus = isInvoiceStatus(statusRaw) ? statusRaw : "초안"
+  const status: InvoiceStatus = isInvoiceStatus(statusRaw) ? statusRaw : "시작 전"
 
-  const itemsRaw = extractText(props["품목"])
-  const items = parseItems(itemsRaw)
+  // 관계 연결 품목 페이지가 전달된 경우 변환, 없으면 빈 배열
+  const items = relatedItemPages
+    ? relatedItemPages.map(mapItemPageToInvoiceItem)
+    : []
 
-  const subtotal = extractNumber(props["소계"])
-  const tax = extractNumber(props["세금"])
-  const totalAmount = extractNumber(props["최종금액"])
+  // 소계·세금·최종금액을 품목 데이터에서 자동 계산
+  const subtotal = items.reduce((sum, item) => sum + item.amount, 0)
+  const tax = Math.round(subtotal * 0.1)
+  const totalAmount = subtotal + tax
 
   return {
     id: page.id,

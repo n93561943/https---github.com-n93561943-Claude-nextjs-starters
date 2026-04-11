@@ -1,33 +1,49 @@
 import type { Metadata } from "next"
-import Link from "next/link"
-import { getInvoices } from "@/lib/notion"
-import {
-  mapPageToInvoice,
-  formatCurrency,
-  formatDate,
-  INVOICE_STATUS_VARIANT,
-  INVOICE_STATUS_LABEL,
-} from "@/lib/invoice"
-import { Badge } from "@/components/ui/badge"
+import { Suspense } from "react"
+import { getInvoicesWithItems } from "@/lib/notion"
+import { mapPageToInvoice } from "@/lib/invoice"
+import type { InvoiceStatus } from "@/lib/invoice"
+import { InvoiceTable } from "@/components/invoice/invoice-table"
+import { InvoiceStatusFilter } from "@/components/invoice/invoice-status-filter"
 
 export const metadata: Metadata = {
   title: "견적서 목록 | Invoice Web",
   robots: { index: false },
 }
 
+// 60초마다 ISR 재검증
+export const revalidate = 60
+
+interface InvoicesPageProps {
+  searchParams: Promise<{ status?: string }>
+}
+
+/** 유효한 InvoiceStatus 값 목록 (Notion DB 실제 옵션과 일치) */
+const VALID_STATUSES: InvoiceStatus[] = ["시작 전", "진행 중", "완료"]
+
 /**
  * F-007: Admin 견적서 목록 조회
  * F-008: 공유 링크 복사
+ * F-009: 상태 필터
  *
  * Notion DB에서 견적서 목록을 조회하여 테이블로 표시
+ * searchParams.status 값으로 Notion API 필터 적용
  */
-export default async function InvoicesPage() {
+export default async function InvoicesPage({ searchParams }: InvoicesPageProps) {
+  const { status } = await searchParams
+
+  // 유효한 상태 값일 경우에만 Notion 필터 생성
+  const isValidStatus = status && VALID_STATUSES.includes(status as InvoiceStatus)
+  const filter = isValidStatus
+    ? { property: "상태", select: { equals: status } }
+    : undefined
+
   let invoices: ReturnType<typeof mapPageToInvoice>[] = []
   let error: string | null = null
 
   try {
-    const pages = await getInvoices()
-    invoices = pages.map(mapPageToInvoice)
+    const results = await getInvoicesWithItems(filter)
+    invoices = results.map(({ page, itemPages }) => mapPageToInvoice(page, itemPages))
   } catch (err) {
     error =
       err instanceof Error
@@ -37,12 +53,22 @@ export default async function InvoicesPage() {
 
   return (
     <div className="space-y-6">
-      {/* 페이지 헤더 */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">견적서 목록</h1>
-        <p className="text-muted-foreground">
-          노션 데이터베이스와 연동된 견적서를 관리합니다.
-        </p>
+      {/* 페이지 헤더 + 상태 필터 */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">견적서 목록</h1>
+          <p className="text-muted-foreground">
+            노션 데이터베이스와 연동된 견적서를 관리합니다.
+          </p>
+        </div>
+        {/* useSearchParams 사용으로 Suspense 경계 필요 */}
+        <Suspense
+          fallback={
+            <div className="h-10 w-[140px] animate-pulse rounded-md bg-muted" />
+          }
+        >
+          <InvoiceStatusFilter />
+        </Suspense>
       </div>
 
       {/* 에러 상태 */}
@@ -52,60 +78,8 @@ export default async function InvoicesPage() {
         </div>
       )}
 
-      {/* 빈 상태 */}
-      {!error && invoices.length === 0 && (
-        <div className="rounded-lg border border-border p-8 text-center text-muted-foreground">
-          <p className="text-sm">등록된 견적서가 없습니다.</p>
-        </div>
-      )}
-
-      {/* 견적서 목록 테이블 */}
-      {!error && invoices.length > 0 && (
-        <div className="overflow-hidden rounded-lg border border-border">
-          <table className="w-full text-sm">
-            <thead className="border-b border-border bg-muted/50">
-              <tr>
-                <th className="px-4 py-3 text-left font-medium">제목</th>
-                <th className="px-4 py-3 text-left font-medium">클라이언트</th>
-                <th className="px-4 py-3 text-left font-medium">상태</th>
-                <th className="px-4 py-3 text-left font-medium">발행일</th>
-                <th className="px-4 py-3 text-right font-medium">최종금액</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoices.map((invoice) => (
-                <tr
-                  key={invoice.id}
-                  className="border-b border-border transition-colors last:border-0 hover:bg-muted/30"
-                >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/invoices/${invoice.id}`}
-                      className="font-medium hover:underline"
-                    >
-                      {invoice.title || "제목 없음"}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {invoice.clientName || "-"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Badge variant={INVOICE_STATUS_VARIANT[invoice.status]}>
-                      {INVOICE_STATUS_LABEL[invoice.status]}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-muted-foreground">
-                    {formatDate(invoice.issuedAt)}
-                  </td>
-                  <td className="px-4 py-3 text-right font-medium">
-                    {formatCurrency(invoice.totalAmount)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* 견적서 테이블 (빈 목록 처리는 InvoiceTable 내부에서 담당) */}
+      {!error && <InvoiceTable invoices={invoices} />}
     </div>
   )
 }

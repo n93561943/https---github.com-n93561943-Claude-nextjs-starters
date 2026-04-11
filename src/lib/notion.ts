@@ -75,3 +75,75 @@ export async function getInvoiceByPageId(
     return null
   }
 }
+
+/**
+ * 여러 페이지 ID로 Items DB 페이지 목록 조회 (병렬 fetch)
+ * @param pageIds - Items DB 페이지 ID 배열
+ */
+export async function getItemPagesByIds(
+  pageIds: string[]
+): Promise<PageObjectResponse[]> {
+  if (pageIds.length === 0) return []
+
+  const results = await Promise.all(
+    pageIds.map(async (id) => {
+      try {
+        const page = await notion.pages.retrieve({ page_id: id })
+        return page.object === "page" ? (page as PageObjectResponse) : null
+      } catch {
+        return null
+      }
+    })
+  )
+
+  return results.filter((p): p is PageObjectResponse => p !== null)
+}
+
+/**
+ * 견적서 목록과 각 견적서의 품목 페이지를 함께 조회 (병렬 fetch)
+ * 목록 페이지에서 totalAmount를 정확히 표시하기 위해 사용
+ * @param filter - Notion API 필터 조건 (선택)
+ */
+export async function getInvoicesWithItems(
+  filter?: QueryFilter
+): Promise<{ page: PageObjectResponse; itemPages: PageObjectResponse[] }[]> {
+  const pages = await getInvoices(filter)
+
+  return Promise.all(
+    pages.map(async (page) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const relationProp = (page.properties["품목"] as any)
+      const itemIds: string[] =
+        relationProp?.type === "relation"
+          ? relationProp.relation?.map((r: { id: string }) => r.id) ?? []
+          : []
+
+      const itemPages = await getItemPagesByIds(itemIds)
+      return { page, itemPages }
+    })
+  )
+}
+
+/**
+ * 견적서 페이지와 연결된 품목 페이지를 함께 조회
+ * @param pageId - Invoices DB 페이지 ID
+ */
+export async function getInvoiceWithItems(pageId: string): Promise<{
+  page: PageObjectResponse
+  itemPages: PageObjectResponse[]
+} | null> {
+  const page = await getInvoiceByPageId(pageId)
+  if (!page) return null
+
+  // "품목" relation 필드에서 연결된 페이지 ID 추출
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const relationProp = (page.properties["품목"] as any)
+  const itemIds: string[] =
+    relationProp?.type === "relation"
+      ? relationProp.relation?.map((r: { id: string }) => r.id) ?? []
+      : []
+
+  const itemPages = await getItemPagesByIds(itemIds)
+
+  return { page, itemPages }
+}
