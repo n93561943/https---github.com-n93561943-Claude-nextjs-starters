@@ -128,3 +128,28 @@
     @apply font-sans;
   }
 }
+
+/* 인쇄 / PDF 저장 스타일 */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 20mm;
+  }
+
+  /* print:hidden 유틸리티 클래스 강제 숨김 */
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* 품목 행이 페이지 경계에서 잘리지 않도록 처리 */
+  tr,
+  .invoice-item {
+    break-inside: avoid;
+  }
+
+  /* 배경색·테두리가 인쇄 시에도 그대로 출력되도록 강제 */
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}
